@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>PennyNest | Secure Student Finance</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <!-- External CSS Link -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ================= WELCOME / PRIVATE LOGIN & ADMIN LOCK SCREEN ================= -->
+  <section id="welcomeScreen">
+    <!-- Colorful Dancing Balls Only Background (All Piggies Removed) -->
+    <div class="dancing-bg-stage" aria-hidden="true">
+      <div class="dancing-ball ball-1"></div>
+      <div class="dancing-ball ball-2"></div>
+      <div class="dancing-ball ball-3"></div>
+      <div class="dancing-ball ball-4"></div>
+      <div class="dancing-ball ball-5"></div>
+      <div class="dancing-ball ball-6"></div>
+      <div class="dancing-ball ball-7"></div>
+      <div class="dancing-ball ball-8"></div>
+    </div>
+
+    <div class="welcome-card">
+      <span class="welcome-badge">🏡 Secure Student Finance Suite</span>
+      <h1 class="welcome-title" id="welcomeHeading">Welcome to PennyNest</h1>
+      <p class="welcome-desc" id="welcomeDesc">
+        A soothing, private space built for students to nest their monthly allowance, track daily campus expenses, and celebrate every savings milestone.
+      </p>
+
+      <!-- Mode Switch Tabs: Log In vs Create Profile -->
+      <div class="auth-mode-tabs" id="authModeTabs">
+        <button type="button" id="tabLoginMode" class="auth-tab active" onclick="switchAuthMode('login')">🔑 Log In</button>
+        <button type="button" id="tabRegisterMode" class="auth-tab" onclick="switchAuthMode('register')">🐼 Create Profile</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="loginForm" onsubmit="handleLoginUser(event)" class="form-stack">
+        <div class="form-group" id="loginRoleGroup">
+          <label for="loginRole">Login As</label>
+          <select id="loginRole">
+            <option value="user">🐼 Student User</option>
+            <option value="admin" id="loginAdminOption">👑 Admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="loginEmail">Email Address</label>
+          <input type="email" id="loginEmail" placeholder="Enter your email address" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPin">4-Digit Passcode</label>
+          <input type="password" id="loginPin" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="••••" required class="pin-input">
+        </div>
+        <button type="submit" class="btn btn-primary enter-btn">Unlock Your Nest 🏡</button>
+      </form>
+
+      <!-- CREATE PROFILE FORM -->
+      <form id="registerForm" onsubmit="handleRegisterUser(event)" class="form-stack hidden">
+        <div class="form-group" id="regRoleGroup">
+          <label for="regRole">Account Role</label>
+          <select id="regRole">
+            <option value="user">🐼 Student User</option>
+            <option value="admin" id="regAdminOption">👑 Admin</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="regName">Your Name</label>
+          <input type="text" id="regName" placeholder="e.g., Ayesha" required>
+        </div>
+        <div class="form-group">
+          <label for="regEmail">Email Address / User ID</label>
+          <input type="email" id="regEmail" placeholder="Enter your email address" required>
+        </div>
+        <div class="form-group">
+          <label for="regPin">Create 4-Digit Passcode</label>
+          <input type="password" id="regPin" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="••••" required class="pin-input">
+        </div>
+        <button type="submit" class="btn btn-primary enter-btn">Create Private Nest 🏡</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <nav class="navbar" id="mainNavbar">
+    <div class="nav-container">
+      <a class="logo" onclick="handleLogoClick()" title="Go to Home">🏡 PennyNest</a>
+      
+      <div class="nav-right">
+        <div class="nav-links" id="studentNavLinks">
+          <a id="nav-adminCommandPage" class="hidden" onclick="openPage('adminCommandPage')">👑 Command Center</a>
+          <a id="nav-dashboardPage" class="active" onclick="openPage('dashboardPage')">Dashboard</a>
+          <a id="nav-transactionsPage" onclick="openPage('transactionsPage')">Transactions</a>
+          <a id="nav-budgetPage" onclick="openPage('budgetPage')">Budgets</a>
+          <a id="nav-goalsPage" onclick="openPage('goalsPage')">Savings Goals</a>
+          <a id="nav-cozyNestsPage" onclick="openPage('cozyNestsPage')">Cozy Nests</a>
+        </div>
+
+        <!-- Pastel Vibe Switcher (3 Dots Just Before Profile Icon) -->
+        <div class="vibe-switcher" title="Switch Pastel Vibe">
+          <span class="vibe-dot dot-matcha" onclick="setTheme('matcha')" title="Matcha Mint"></span>
+          <span class="vibe-dot dot-sakura" onclick="setTheme('sakura')" title="Sakura Pink"></span>
+          <span class="vibe-dot dot-sky" onclick="setTheme('sky')" title="Cotton Candy Sky"></span>
+        </div>
+
+        <!-- Round Profile Icon Only -->
+        <button type="button" id="topProfileBtn" class="profile-icon-round" onclick="toggleProfileModal()" title="View Profile">
+          🐼
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ================= ADMIN NOTE BANNER (FOR USERS RECEIVING ADMIN MESSAGES) ================= -->
+  <div id="adminInboxBanner" class="admin-inbox-banner hidden">
+    <span id="adminInboxText">💬 Note from Admin: Welcome to PennyNest!</span>
+    <button type="button" class="btn btn-outline btn-sm" onclick="dismissAdminNotes()">Dismiss ✕</button>
+  </div>
+
+  <!-- ================= CUTE PANDA PROFILE MODAL (CLEAN — NO ADMIN QUICK DIRECTORY) ================= -->
+  <div id="profileModal" onclick="if(event.target === this) toggleProfileModal()">
+    <div class="profile-card" id="profileModalCard">
+      <div class="profile-avatar-wrap" onclick="toggleAvatarOptionsMenu(event)" title="Click to change Avatar or Personal Photo">
+        <div class="profile-avatar" id="pandaAvatar">🐼</div>
+        <span class="panda-tap-hint">Tap circle to change picture ✨</span>
+      </div>
+
+      <!-- Popover Menu Revealed Only When Clicking the Profile Circle -->
+      <div id="avatarOptionsPopover" class="avatar-popover hidden">
+        <div class="avatar-popover-buttons">
+          <button type="button" class="btn btn-outline btn-sm" onclick="showPresetAvatarGrid()">🐼 Choose Avatar</button>
+          <label class="btn btn-primary btn-sm" style="cursor:pointer; margin:0;">
+            📷 Personal Photo
+            <input type="file" id="profilePhotoInput" accept="image/*" onchange="handlePersonalPhotoUpload(event)" style="display:none;">
+          </label>
+        </div>
+        <div id="presetAvatarGrid" class="avatar-preset-row hidden">
+          <button type="button" class="avatar-choice-btn" onclick="updateUserAvatar('🐼')">🐼</button>
+          <button type="button" class="avatar-choice-btn" onclick="updateUserAvatar('🐻')">🐻</button>
+          <button type="button" class="avatar-choice-btn" onclick="updateUserAvatar('🐰')">🐰</button>
+          <button type="button" class="avatar-choice-btn" onclick="updateUserAvatar('🌟')">🌟</button>
+          <button type="button" class="avatar-choice-btn" onclick="updateUserAvatar('🦊')">🦊</button>
+          <button type="button" class="avatar-choice-btn" onclick="updateUserAvatar('🐱')">🐱</button>
+          <button type="button" class="avatar-choice-btn" onclick="updateUserAvatar('🎍')">🎍</button>
+          <button type="button" class="avatar-choice-btn" onclick="updateUserAvatar('🌸')">🌸</button>
+        </div>
+      </div>
+
+      <h3 id="modalName" class="profile-name">Student Name</h3>
+      <p id="modalEmail" class="profile-email">student@email.com</p>
+      <span id="modalRoleBadge" class="welcome-badge" style="margin-bottom: 10px;">🐼 Student User</span>
+
+      <!-- Cute Rotating Panda Mood Box -->
+      <div class="panda-mood-box" onclick="rotatePandaMood()" title="Tap to switch mood">
+        <p id="pandaMoodText">🐼 Munching bamboo on a mindful student budget...</p>
+      </div>
+      
+      <div class="profile-actions">
+        <button type="button" class="btn btn-outline full-width" onclick="lockApp()">🔐 Switch Account / Lock Nest</button>
+        <button type="button" class="btn btn-danger full-width" onclick="resetCurrentUserData()">🧹 Reset My Personal Data</button>
+        <button type="button" class="btn btn-danger full-width" onclick="deleteMyOwnProfile()">🗑️ Delete My Profile</button>
+        <button type="button" class="btn btn-primary full-width" onclick="toggleProfileModal()">✕ Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CUSTOM CUTE MODAL FOR ALL CONFIRMATIONS, RESETS & ALERTS ================= -->
+  <div id="customActionModal" class="custom-modal-overlay hidden" onclick="if(event.target === this) closeCustomModal()">
+    <div class="custom-modal-card">
+      <div id="customModalIcon" class="custom-modal-icon">🐼</div>
+      <h3 id="customModalTitle">Are you sure?</h3>
+      <p id="customModalMessage">Please confirm your action.</p>
+      <div class="custom-modal-actions">
+        <button type="button" id="customModalCancelBtn" class="btn btn-outline" onclick="closeCustomModal()">Cancel</button>
+        <button type="button" id="customModalConfirmBtn" class="btn btn-danger">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN SEND MESSAGE MODAL ================= -->
+  <div id="adminMsgModal" class="custom-modal-overlay hidden" onclick="if(event.target === this) closeAdminMsgModal()">
+    <div class="custom-modal-card">
+      <div class="custom-modal-icon">💬🐼</div>
+      <h3>Send Admin Note</h3>
+      <p id="adminMsgTargetText">Send a message to this student's dashboard:</p>
+      <form onsubmit="handleConfirmAdminMsg(event)">
+        <div class="form-group" style="text-align:left;">
+          <input type="text" id="adminMsgInput" placeholder="Write a friendly note or reminder..." required>
+        </div>
+        <div class="custom-modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeAdminMsgModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Send 💬</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= HAPPY PANDA GOAL ACHIEVEMENT CELEBRATION MODAL ================= -->
+  <div id="happyPiggyModal" class="piggy-celebration-overlay hidden" onclick="if(event.target === this) closeHappyPiggyModal()">
+    <div class="piggy-celebration-card">
+      <div class="happy-piggy-bounce">🐼🏆🌟</div>
+      <span class="welcome-badge">🏆 100% Goal Milestone Reached!</span>
+      <h2 id="happyPiggyTitle">Hurray! Happy Panda Dance!</h2>
+      <p id="happyPiggyDesc">You reached 100% of your savings target! Penny Panda is proud of your discipline!</p>
+      <div class="piggy-cheer-row">
+        <span>🎋</span><span>💚</span><span>🐼</span><span>🌸</span><span>🎉</span>
+      </div>
+      <button type="button" class="btn btn-primary full-width" onclick="closeHappyPiggyModal()">Yay! Keep Saving 🏡</button>
+    </div>
+  </div>
+
+  <!-- ================= EXCLUSIVE ADMIN COMMAND CENTER (PASTEL MATRIX STRUCTURE) ================= -->
+  <main id="adminCommandPage" class="admin-matrix-wrapper page-view" style="display: none;">
+    <div class="admin-matrix-layout">
+      <!-- Left Pastel-Themed Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-brand">
+          <span class="admin-brand-icon">👑</span>
+          <div>
+            <h4>PennyAdmin</h4>
+            <small>Site Owner Suite</small>
+          </div>
+        </div>
+
+        <nav class="admin-side-nav">
+          <button type="button" id="admTabBtn-overview" class="admin-side-link active" onclick="switchAdminSubTab('overview')">
+            <span>⊞</span> Dashboard Overview
+          </button>
+          <button type="button" id="admTabBtn-directory" class="admin-side-link" onclick="switchAdminSubTab('directory')">
+            <span>🐼</span> User Directory
+          </button>
+          <button type="button" id="admTabBtn-nests" class="admin-side-link" onclick="switchAdminSubTab('nests')">
+            <span>🪺</span> Cozy Nests Monitor
+          </button>
+          <button type="button" id="admTabBtn-analysis" class="admin-side-link" onclick="switchAdminSubTab('analysis')">
+            <span>📈</span> Site Analysis
+          </button>
+          <button type="button" id="admTabBtn-health" class="admin-side-link" onclick="switchAdminSubTab('health')">
+            <span>🛡️</span> Platform Health
+          </button>
+          <hr class="admin-side-divider">
+          <button type="button" class="admin-side-link personal-switch-btn" onclick="openPage('dashboardPage')">
+            <span>🏡</span> My Personal Finance
+          </button>
+        </nav>
+
+        <div class="admin-sidebar-footer">
+          <p>🔒 Privacy-Safe Mode Active</p>
+          <small>User PINs & personal balances are encrypted and hidden.</small>
+        </div>
+      </aside>
+
+      <!-- Main Admin Content Area -->
+      <div class="admin-main-panel">
+        <header class="admin-topbar">
+          <div>
+            <h1 id="adminSubPageTitle">Admin Command Dashboard</h1>
+            <p id="adminSubPageSubtitle">Pastel Matrix overview of community growth, activity trends, and privacy-safe user summaries.</p>
+          </div>
+          <div class="admin-topbar-right">
+            <span class="welcome-badge" style="margin-bottom:0;">👑 Site Owner</span>
+            <button type="button" class="btn btn-outline btn-sm" onclick="openPage('dashboardPage')">🏡 Switch to Personal Finance</button>
+          </div>
+        </header>
+
+        <!-- SUB-VIEW 1: OVERVIEW -->
+        <div id="adminSubView-overview" class="admin-subview">
+          <div class="matrix-tiles-grid">
+            <div class="matrix-tile tile-cyan" onclick="switchAdminSubTab('directory')">
+              <div class="tile-info">
+                <h2 id="admTileUsers" class="num-font">0</h2>
+                <span>Total Registered Users</span>
+              </div>
+              <div class="tile-icon">🐼</div>
+            </div>
+
+            <div class="matrix-tile tile-emerald" onclick="switchAdminSubTab('nests')">
+              <div class="tile-info">
+                <h2 id="admTileNests" class="num-font">0</h2>
+                <span>Active Cozy Nests</span>
+              </div>
+              <div class="tile-icon">🪺</div>
+            </div>
+
+            <div class="matrix-tile tile-amber" onclick="switchAdminSubTab('analysis')">
+              <div class="tile-info">
+                <h2 id="admTileGoals" class="num-font">0</h2>
+                <span>Total Goals Created</span>
+              </div>
+              <div class="tile-icon">🎯</div>
+            </div>
+
+            <div class="matrix-tile tile-coral" onclick="switchAdminSubTab('analysis')">
+              <div class="tile-info">
+                <h2 id="admTileCompletedGoals" class="num-font">0</h2>
+                <span>Completed 100% Goals</span>
+              </div>
+              <div class="tile-icon">🏆</div>
+            </div>
+
+            <div class="matrix-tile tile-indigo" onclick="switchAdminSubTab('analysis')">
+              <div class="tile-info">
+                <h2 id="admTileTxCount" class="num-font">0</h2>
+                <span>Total Transactions Logged</span>
+              </div>
+              <div class="tile-icon">📋</div>
+            </div>
+
+            <div class="matrix-tile tile-plum" onclick="switchAdminSubTab('health')">
+              <div class="tile-info">
+                <h2>All Cozy ✨</h2>
+                <span>Platform Health Check</span>
+              </div>
+              <div class="tile-icon">🛡️</div>
+            </div>
+
+            <div class="matrix-tile tile-mint" onclick="openPage('dashboardPage')">
+              <div class="tile-info">
+                <h2>Personal Nest</h2>
+                <span>Manage My Own Allowance</span>
+              </div>
+              <div class="tile-icon">🏡</div>
+            </div>
+
+            <div class="matrix-tile tile-rose" onclick="openPage('transactionsPage')">
+              <div class="tile-info">
+                <h2>My Ledger</h2>
+                <span>Add & Export My Transactions</span>
+              </div>
+              <div class="tile-icon">📥</div>
+            </div>
+          </div>
+
+          <!-- Site Analysis Card -->
+          <section class="card admin-analysis-card">
+            <div class="card-header-row">
+              <div>
+                <h3 style="margin-bottom:2px;">📈 Site Analysis & Activity Wave</h3>
+                <p class="treat-sub">Overview of platform engagement across the year (Non-private aggregate activity)</p>
+              </div>
+              <span class="badge">Live Telemetry</span>
+            </div>
+
+            <div class="site-analysis-grid">
+              <div class="wave-chart-box">
+                <svg viewBox="0 0 600 220" class="pastel-wave-svg" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="waveGradPrimary" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.42"/>
+                      <stop offset="100%" stop-color="var(--primary)" stop-opacity="0.02"/>
+                    </linearGradient>
+                    <linearGradient id="waveGradPink" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.32"/>
+                      <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.02"/>
+                    </linearGradient>
+                  </defs>
+                  <line x1="0" y1="40" x2="600" y2="40" stroke="var(--border)" stroke-dasharray="4 4"/>
+                  <line x1="0" y1="95" x2="600" y2="95" stroke="var(--border)" stroke-dasharray="4 4"/>
+                  <line x1="0" y1="150" x2="600" y2="150" stroke="var(--border)" stroke-dasharray="4 4"/>
+                  <line x1="0" y1="200" x2="600" y2="200" stroke="var(--border)"/>
+
+                  <path d="M0,150 C80,40 140,40 220,145 C300,210 360,35 450,120 C510,180 560,60 600,90 L600,200 L0,200 Z" fill="url(#waveGradPrimary)"/>
+                  <path d="M0,150 C80,40 140,40 220,145 C300,210 360,35 450,120 C510,180 560,60 600,90" fill="none" stroke="var(--primary)" stroke-width="3.5"/>
+
+                  <path d="M0,95 C90,190 160,185 240,80 C320,15 390,180 470,135 C530,90 570,155 600,130 L600,200 L0,200 Z" fill="url(#waveGradPink)"/>
+                  <path d="M0,95 C90,190 160,185 240,80 C320,15 390,180 470,135 C530,90 570,155 600,130" fill="none" stroke="#f43f5e" stroke-width="3"/>
+                </svg>
+                <div class="wave-legend">
+                  <span><i class="legend-dot" style="background:var(--primary);"></i> Monthly Activity Logs</span>
+                  <span><i class="legend-dot" style="background:#f43f5e;"></i> Savings & Cozy Nest Milestones</span>
+                </div>
+              </div>
+
+              <div class="matrix-stat-boxes">
+                <div class="matrix-dark-box">
+                  <span class="m-box-icon">👥</span>
+                  <h4 id="admBoxTotalUsers" class="num-font">0</h4>
+                  <small>Total Users</small>
+                </div>
+                <div class="matrix-dark-box">
+                  <span class="m-box-icon">✨</span>
+                  <h4 id="admBoxNewUsers" class="num-font">0</h4>
+                  <small>Joined This Month</small>
+                </div>
+                <div class="matrix-dark-box">
+                  <span class="m-box-icon">🪺</span>
+                  <h4 id="admBoxActiveNests" class="num-font">0</h4>
+                  <small>Active Nests</small>
+                </div>
+                <div class="matrix-dark-box">
+                  <span class="m-box-icon">🎯</span>
+                  <h4 id="admBoxTotalGoals" class="num-font">0</h4>
+                  <small>Total Goals</small>
+                </div>
+                <div class="matrix-dark-box">
+                  <span class="m-box-icon">🏆</span>
+                  <h4 id="admBoxCompletedGoals" class="num-font">0</h4>
+                  <small>Completed Goals</small>
+                </div>
+                <div class="matrix-dark-box">
+                  <span class="m-box-icon">📊</span>
+                  <h4 id="admBoxTotalLogs" class="num-font">0</h4>
+                  <small>Total Tx Logs</small>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Privacy-Safe User Summary Table -->
+          <section class="card">
+            <div class="card-header-row">
+              <div>
+                <h3 style="margin-bottom:2px;">🐼 Privacy-Safe User Summary Table</h3>
+                <p class="treat-sub">Displays accounts stored in this browser's local database — passcodes and personal balances are never exposed.</p>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="ledger-table admin-user-table">
+                <thead>
+                  <tr>
+                    <th>Avatar</th>
+                    <th>Name</th>
+                    <th>Email / User ID</th>
+                    <th>Role</th>
+                    <th>Joined</th>
+                    <th>Tx Logs</th>
+                    <th>Goals</th>
+                    <th>Nests</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="adminOverviewUsersBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- SUB-VIEW 2: FULL USER DIRECTORY -->
+        <div id="adminSubView-directory" class="admin-subview hidden">
+          <section class="card">
+            <div class="card-header-row">
+              <div>
+                <h3>🐼 Registered User Directory</h3>
+                <p class="treat-sub">Search registered student profiles and view privacy-safe activity counts.</p>
+              </div>
+              <input type="text" id="adminUserSearchInput" oninput="renderAdminDashboard()" placeholder="🔍 Search user name or email..." style="max-width:260px;">
+            </div>
+            <div class="table-responsive">
+              <table class="ledger-table admin-user-table">
+                <thead>
+                  <tr>
+                    <th>Avatar</th>
+                    <th>Name</th>
+                    <th>Email / User ID</th>
+                    <th>Role</th>
+                    <th>Joined</th>
+                    <th>Tx Logs</th>
+                    <th>Goals</th>
+                    <th>Nests</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="adminDirectoryUsersBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- SUB-VIEW 3: COZY NESTS MONITOR -->
+        <div id="adminSubView-nests" class="admin-subview hidden">
+          <section class="card">
+            <div class="card-header-row">
+              <div>
+                <h3>🪺 Global Cozy Nests Monitor</h3>
+                <p class="treat-sub">High-level summary of collaborative student groups and completion progress.</p>
+              </div>
+            </div>
+            <div id="adminCozyNestsMonitorList" class="goals-grid"></div>
+          </section>
+        </div>
+
+        <!-- SUB-VIEW 4: SITE ANALYSIS BREAKDOWN -->
+        <div id="adminSubView-analysis" class="admin-subview hidden">
+          <section class="card">
+            <h3>📊 Platform Category Activity Breakdown (Transaction Counts Only)</h3>
+            <p class="treat-sub" style="margin-bottom:16px;">Shows how many transactions were logged per category across all users without exposing private BDT amounts.</p>
+            <div id="adminCategoryCountBars" class="budget-bars"></div>
+          </section>
+        </div>
+
+        <!-- SUB-VIEW 5: PLATFORM HEALTH -->
+        <div id="adminSubView-health" class="admin-subview hidden">
+          <section class="card">
+            <h3>🛡️ System Health & Privacy Diagnostics</h3>
+            <p class="treat-sub" style="margin-bottom:16px;">All PennyNest local storage modules and privacy protections are running smoothly.</p>
+            <div class="budget-bars">
+              <div class="budget-item">
+                <div class="budget-top">
+                  <strong>🔒 User Passcode & Balance Privacy Shield</strong>
+                  <span class="badge">Active ✓</span>
+                </div>
+                <p class="treat-sub">Personal 4-digit PINs, individual BDT balances, and transaction descriptions are hidden from admin summaries.</p>
+              </div>
+              <div class="budget-item">
+                <div class="budget-top">
+                  <strong>👑 Exclusive Single-Admin Lock</strong>
+                  <span class="badge">Locked ✓</span>
+                </div>
+                <p class="treat-sub">Admin role option is permanently hidden from the public login/signup screen once registered.</p>
+              </div>
+              <div class="budget-item">
+                <div class="budget-top">
+                  <strong>🪺 Multi-User Cozy Nests Sync</strong>
+                  <span class="badge">Operational ✓</span>
+                </div>
+                <p class="treat-sub">Shared group goals and member chat logs are synced across local profiles.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= PAGE 1: PERSONAL DASHBOARD ================= -->
+  <main id="dashboardPage" class="container page-view" style="display: none;">
+    <header class="page-header">
+      <div>
+        <h1 id="greetingHeader">Financial Overview</h1>
+        <p>Your cozy space to track student allowance, daily spending, and savings.</p>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button type="button" id="backToAdminCenterBtn" class="btn btn-primary hidden" onclick="openPage('adminCommandPage')">👑 Back to Admin Command Center</button>
+        <button type="button" class="btn btn-outline" onclick="loadSampleData()">📥 Load Sample Data</button>
+      </div>
+    </header>
+
+    <div class="piggy-banner">
+      <div class="piggy-icon">🐼</div>
+      <div class="piggy-text">
+        <h4>Penny Panda Status</h4>
+        <p id="piggyStatusMsg">Loading your financial mood...</p>
+      </div>
+    </div>
+
+    <section class="stats-grid">
+      <div class="stat-card balance-card">
+        <span class="stat-label">Available Balance</span>
+        <h2 id="totalBalance">0 BDT</h2>
+        <p class="stat-sub" id="safeDailySpend">Safe daily spend: 0 BDT/day</p>
+      </div>
+      <div class="stat-card income-card">
+        <span class="stat-label">Total Income / Allowance</span>
+        <h2 id="totalIncome" class="text-green">+0 BDT</h2>
+        <p class="stat-sub">Logged inflows</p>
+      </div>
+      <div class="stat-card expense-card">
+        <span class="stat-label">Total Expenses</span>
+        <h2 id="totalExpense" class="text-red">0 BDT</h2>
+        <p class="stat-sub">Logged outflows</p>
+      </div>
+    </section>
+
+    <div class="two-col-grid">
+      <div class="dashboard-left-col">
+        <section class="card">
+          <h3>➕ Quick Add Transaction</h3>
+          <form id="quickAddForm" onsubmit="handleSaveTransaction(event)">
+            <div class="form-group">
+              <label for="txTitle">Description</label>
+              <input type="text" id="txTitle" placeholder="e.g., Campus Canteen Lunch" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="txAmount">Amount (BDT)</label>
+                <input type="number" id="txAmount" min="1" step="any" placeholder="e.g., 120" required>
+              </div>
+              <div class="form-group">
+                <label for="txType">Type</label>
+                <select id="txType" required>
+                  <option value="expense">Expense (-)</option>
+                  <option value="income">Income / Allowance (+)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="txCategory">Category</label>
+                <select id="txCategory" required>
+                  <option value="Food">🍔 Food & Snacks</option>
+                  <option value="Transport">🚕 Transport & Fare</option>
+                  <option value="Education">📚 Books & Study</option>
+                  <option value="Utilities">📱 Mobile & Internet</option>
+                  <option value="Entertainment">🎮 Outings & Fun</option>
+                  <option value="Allowance">💵 Monthly Allowance / Tuition</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="txDate">Date</label>
+                <input type="date" id="txDate" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary full-width">Save Transaction</button>
+            <p id="saveFeedback" class="save-feedback">
+              🎉 Transaction saved to PennyNest!
+            </p>
+          </form>
+        </section>
+
+        <!-- AI CHATBOX PLACED DIRECTLY BELOW QUICK ADD TRANSACTION -->
+        <section class="card ai-chat-card" id="studentAiChatSection">
+          <div class="card-header-row" style="margin-bottom: 8px;">
+            <h3>🐼 Penny AI Assistant</h3>
+            <span class="badge">✨ Smart Assistant</span>
+          </div>
+          <p class="treat-sub" style="margin-bottom: 10px;">Ask to guide you about PennyAI & PennyNest, say hi, or ask about your allowance, treats, budgets, or savings!</p>
+
+          <div class="ai-quick-chips">
+            <button type="button" class="ai-chip" onclick="sendPresetAiPrompt('Guide me about PennyAI and PennyNest')">🧭 Guide Me</button>
+            <button type="button" class="ai-chip" onclick="sendPresetAiPrompt('Hi Penny!')">👋 Say Hi</button>
+            <button type="button" class="ai-chip" onclick="sendPresetAiPrompt('How much can I spend today?')">🎍 Daily Spend</button>
+            <button type="button" class="ai-chip" onclick="sendPresetAiPrompt('Can I afford a 180 BDT iced coffee?')">🧋 Treat Check</button>
+            <button type="button" class="ai-chip" onclick="sendPresetAiPrompt('Where am I spending the most?')">📊 Top Category</button>
+            <button type="button" class="ai-chip" onclick="sendPresetAiPrompt('How are my savings goals?')">🎯 Goals</button>
+            <button type="button" class="ai-chip" onclick="sendPresetAiPrompt('Give me a hostel budget tip')">💡 Money Tip</button>
+          </div>
+
+          <div id="aiChatMessages" class="ai-chat-messages"></div>
+
+          <form onsubmit="handleAiChatSubmit(event)" class="ai-input-row">
+            <input type="text" id="aiChatInput" placeholder="Ask Penny AI about PennyNest or your finances..." required>
+            <button type="submit" class="btn btn-primary btn-sm">Ask</button>
+          </form>
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN: RECENT ACTIVITY + GUILT-FREE TREAT CHECKER -->
+      <section class="card">
+        <div class="card-header-row">
+          <h3>🕒 Recent Activity</h3>
+          <span class="link-small" onclick="openPage('transactionsPage')">View All →</span>
+        </div>
+        <ul id="recentList" class="tx-list"></ul>
+
+        <div class="treat-box">
+          <h4>🧋 Guilt-Free Treat Checker</h4>
+          <p class="treat-sub">Thinking of buying iced coffee or snacks? Test if your budget allows it today:</p>
+          <div class="treat-row">
+            <input type="number" id="treatPriceInput" placeholder="Price in BDT (e.g., 180)">
+            <button type="button" class="btn btn-outline btn-sm" onclick="checkTreatAffordability()">Ask Nest</button>
+          </div>
+          <p id="treatResultMsg" class="treat-result"></p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ================= PAGE 2: TRANSACTIONS ================= -->
+  <main id="transactionsPage" class="container page-view" style="display: none;">
+    <header class="page-header">
+      <div>
+        <h1>Transaction Ledger</h1>
+        <p>Search, filter by any month in the calendar, and download CSV statements based on whichever transaction type you select.</p>
+      </div>
+      <button type="button" class="btn btn-danger" onclick="clearAllHistory()">🗑️ Clear All History</button>
+    </header>
+
+    <section class="card">
+      <div class="filter-bar">
+        <input type="text" id="searchInput" oninput="renderLedgerTable()" placeholder="🔍 Search description...">
+        
+        <select id="filterCategory" onchange="renderLedgerTable()">
+          <option value="All">All Categories</option>
+          <option value="Food">Food & Snacks</option>
+          <option value="Transport">Transport & Fare</option>
+          <option value="Education">Books & Study</option>
+          <option value="Utilities">Mobile & Internet</option>
+          <option value="Entertainment">Outings & Fun</option>
+          <option value="Allowance">Monthly Allowance / Tuition</option>
+        </select>
+
+        <input type="month" id="filterMonth" onchange="renderLedgerTable()" title="Filter by Month (Optional)">
+
+        <select id="filterType" onchange="renderLedgerTable()">
+          <option value="All">All Types</option>
+          <option value="income">Income (+)</option>
+          <option value="expense">Expense (-)</option>
+        </select>
+      </div>
+
+      <div class="download-bar">
+        <span id="monthlySummaryText" class="monthly-summary-text">Showing all matching records</span>
+        <button type="button" id="downloadByTypeBtn" class="btn btn-outline btn-sm" onclick="downloadTransactionsByType()">
+          📥 Download All Types (CSV)
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="ledger-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="ledgerTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= PAGE 3: BUDGETS ================= -->
+  <main id="budgetPage" class="container page-view" style="display: none;">
+    <header class="page-header">
+      <div>
+        <h1>Monthly Category Budgets</h1>
+        <p>Set spending caps for each category and enjoy live Panda mood reactions as you pace your allowance.</p>
+      </div>
+    </header>
+
+    <div class="two-col-grid">
+      <section class="card">
+        <h3>⚙️ Update/Add Category Limit</h3>
+        <form id="budgetForm" onsubmit="handleUpdateBudget(event)">
+          <div class="form-group">
+            <label for="budgetCategory">Select Category</label>
+            <select id="budgetCategory" required>
+              <option value="Food">🍔 Food & Snacks</option>
+              <option value="Transport">🚕 Transport & Fare</option>
+              <option value="Education">📚 Books & Study</option>
+              <option value="Utilities">📱 Mobile & Internet</option>
+              <option value="Entertainment">🎮 Outings & Fun</option>
+              <option value="Allowance">💵 Monthly Allowance / Tuition</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="budgetLimit">Monthly Limit (BDT)</label>
+            <input type="number" id="budgetLimit" min="100" step="50" placeholder="e.g., 2500" required>
+          </div>
+          <button type="submit" class="btn btn-primary full-width">Update Monthly Limit</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h3>📊 Live Spending vs. Budget</h3>
+        <div id="budgetBarsContainer" class="budget-bars"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ================= PAGE 4: SAVINGS GOALS & GREEN COMPLETED HISTORY VAULT ================= -->
+  <main id="goalsPage" class="container page-view" style="display: none;">
+    <header class="page-header">
+      <div>
+        <h1>Student Savings Vault</h1>
+        <p>Create targets for gadgets, courses, or emergency funds. Completed 100% goals are preserved in your green Completed History Vault!</p>
+      </div>
+    </header>
+
+    <div class="two-col-grid">
+      <section class="card">
+        <h3>🎯 Create New Savings Goal</h3>
+        <form id="goalForm" onsubmit="handleCreateGoal(event)">
+          <div class="form-group">
+            <label for="goalTitle">Goal Title</label>
+            <input type="text" id="goalTitle" placeholder="e.g., New SSD / Semester Books" required>
+          </div>
+          <div class="form-group">
+            <label for="goalTarget">Target Amount (BDT)</label>
+            <input type="number" id="goalTarget" min="100" placeholder="e.g., 5000" required>
+          </div>
+          <div class="form-group">
+            <label for="goalSaved">Initial Saved Amount (BDT)</label>
+            <input type="number" id="goalSaved" min="0" value="0" required>
+          </div>
+          <button type="submit" class="btn btn-primary full-width">Create Goal</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h3>🎯 Active Goals</h3>
+        <div id="goalsContainer" class="goals-grid"></div>
+      </section>
+    </div>
+
+    <!-- DEDICATED GREEN COMPLETED HISTORY VAULT -->
+    <section class="card completed-vault-card">
+      <div class="card-header-row">
+        <div>
+          <h3 style="margin-bottom:4px; color:#047857;">🏆 Completed History Vault</h3>
+          <p class="treat-sub" style="color:#065f46;">Completed personal goals and 100% Cozy Nests remain here in green so you can always see your past achievements!</p>
+        </div>
+        <span class="badge badge-completed-green">✓ 100% Achieved History</span>
+      </div>
+      <div id="completedGoalsHistoryContainer" class="goals-grid"></div>
+    </section>
+  </main>
+
+  <!-- ================= PAGE 5: COZY NESTS (COLLABORATIVE SAVINGS & CHAT) ================= -->
+  <main id="cozyNestsPage" class="container page-view" style="display: none;">
+    <div class="cozy-nest-hero">
+      <div class="cozy-hero-left">
+        <h1>Cozy Nests</h1>
+        <p>Build a shared nest with existing PennyNest friends by searching their Name or Email/ID, save toward a joint goal together, and chat live!</p>
+      </div>
+      <div class="cozy-hero-icons">
+        <span>🐼</span><span>🪺</span><span>🌟</span>
+      </div>
+    </div>
+
+    <div class="two-col-grid">
+      <!-- LEFT COLUMN: CREATE A COZY NEST + MY COZY NESTS LIST -->
+      <div class="dashboard-left-col">
+        <section class="card cozy-decorated-card">
+          <h3>🌷 Create a New Cozy Nest</h3>
+          <form id="createNestForm" onsubmit="handleCreateCozyNest(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="nestTitleInput">Cozy Nest Name</label>
+                <input type="text" id="nestTitleInput" placeholder="e.g., Tour Fund / Team Project" required>
+              </div>
+              <div class="form-group">
+                <label for="nestTargetInput">Joint Target (BDT)</label>
+                <input type="number" id="nestTargetInput" min="100" step="any" placeholder="e.g., 6000" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="memberSearchInput">🔍 Search Existing Users by Name or Email/ID</label>
+              <div class="member-search-row">
+                <input type="text" id="memberSearchInput" oninput="searchExistingUsersForNest()" placeholder="Type friend's name or email/ID...">
+              </div>
+              <div id="userSearchResults" class="user-search-results"></div>
+            </div>
+
+            <div class="form-group">
+              <label>Selected Nest Mates</label>
+              <div id="selectedNestMembers" class="selected-members-chips"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary full-width">Build Cozy Nest</button>
+          </form>
+        </section>
+
+        <section class="card" style="margin-top: 20px;">
+          <h3>🏡 Your Active Cozy Nests</h3>
+          <p class="treat-sub" style="margin-bottom: 10px;">Tap a Cozy Nest to open chat. Tap the same Cozy Nest again to close the chat panel!</p>
+          <div id="myCozyNestsList" class="goals-grid"></div>
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN: ACTIVE COZY NEST JOINT GOAL, MEMBER ADD & LIVE CHAT -->
+      <section class="card cozy-chat-panel" id="activeNestPanel">
+        <div id="noNestSelectedView" class="empty-nest-placeholder">
+          <div class="empty-nest-emoji">🪺🐼🌟</div>
+          <h3>Select or Create a Cozy Nest</h3>
+          <p>Click on any Cozy Nest on the left to contribute any amount, invite more friends by Name or ID, and chat with your nest mates!</p>
+        </div>
+
+        <div id="activeNestDetailView" class="hidden">
+          <div class="card-header-row">
+            <div>
+              <h3 id="activeNestName" style="margin-bottom: 4px;">Cozy Nest</h3>
+              <p id="activeNestMembersLine" class="treat-sub"></p>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span id="activeNestPctBadge" class="welcome-badge" style="margin-bottom:0;">0%</span>
+              <button type="button" class="btn btn-danger btn-sm" onclick="deleteActiveCozyNest()" title="Delete Cozy Nest">🗑️</button>
+            </div>
+          </div>
+
+          <!-- Shared Progress Bar -->
+          <div class="budget-item" style="margin-bottom: 14px;">
+            <div class="budget-top">
+              <span>Joint Savings Progress</span>
+              <span id="activeNestAmountText" class="num-font">0 / 0 BDT</span>
+            </div>
+            <div class="progress-track">
+              <div id="activeNestProgressBar" class="progress-fill" style="width: 0%; background: linear-gradient(90deg, var(--primary), var(--accent-secondary));"></div>
+            </div>
+          </div>
+
+          <!-- Contribute Any Custom Amount to Joint Goal -->
+          <form onsubmit="handleContributeToNest(event)" class="goal-custom-deposit" style="margin-bottom: 14px;">
+            <input type="number" id="nestContributeInput" min="1" step="any" placeholder="Contribute any amount (BDT)..." required>
+            <button type="submit" class="btn btn-primary btn-sm">+ Contribute</button>
+          </form>
+
+          <!-- Add Another Existing User to This Active Nest by Name/ID -->
+          <div class="add-mate-inline-box">
+            <label style="margin-bottom:4px;">➕ Invite Another User by Name or Email/ID</label>
+            <div class="treat-row">
+              <input type="text" id="inviteExistingUserInput" placeholder="Enter exact Name or Email/ID...">
+              <button type="button" class="btn btn-outline btn-sm" onclick="handleInviteUserToActiveNest()">Add Mate</button>
+            </div>
+          </div>
+
+          <!-- Cozy Nest Live Group Chat (Profile Avatar Only) -->
+          <div class="nest-chat-box-wrap">
+            <h4>💬 Cozy Nest Chat</h4>
+            <div id="nestChatMessages" class="nest-chat-messages"></div>
+            <form onsubmit="handleSendNestChatMessage(event)" class="ai-input-row">
+              <input type="text" id="nestChatInput" placeholder="Message your nest mates..." required>
+              <button type="submit" class="btn btn-primary btn-sm">Send 💬</button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- External JavaScript Link -->
+  <script src="script.js"></script>
+</body>
+</html>
